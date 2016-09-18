@@ -13,3 +13,26 @@
 - They are not tied to major version updates
 - They do not communicate with getstream
 - They are independent of config and env
+
+
+Use a helper function to determine which tests to skip. This ensures that API tests are only run when a config is present.
+
+```go
+if configMissing() {
+	t.Skip("config missing, running internal tests only")
+}
+
+func configMissing() bool {
+
+	testAPIKey := os.Getenv("key")
+	testAPISecret := os.Getenv("secret")
+	_ = os.Getenv("token")
+	testAppID := os.Getenv("app_id")
+	testRegion := os.Getenv("region")
+
+	if testAPIKey == "" || testAPISecret == "" || testAppID == "" || testRegion == "" {
+		return true
+	}
+	return false
+}
+```

@@ -39,30 +39,49 @@ In this talk, I have presented many of the existing configuration patterns, thos
 ```go
 type Option func(*Client)
 
-// single param option
-func Secret(secret string) Option {
-	return func(c *Client) {
-		c.Secret = secret
-	}
-}
 
-// more complex option
 func ServerOptions(key string, secret string, appID string, location string) Option {
 	return func(c *Client) {
 		c.Key = key
 		c.Secret = secret
-		c.AppID = appID
+		c.ID = appID
 		c.Location = location
 	}
 }
 
-func ClientOptions(key string, token string, appID string, location string) Option {
+func ClientOptions(key string, token string, location string) Option {
 	return func(c *Client) {
 		c.Key = key
 		c.Token = token
-		c.AppID = appID
 		c.Location = location
 	}
+}
+
+func VersionOption(version string) Option {
+	return func(c *Client) {
+		c.Version = version
+	}
+}
+
+func TimeOutOption(timeout time.Duration) Option {
+	return func(c *Client) {
+		if c.HTTP == nil {
+			c.HTTP = &http.Client{
+				Timeout: timeout,
+			}
+		} else {
+			c.HTTP.Timeout = timeout
+		}
+	}
+}
+
+func main() {
+
+	srvOpts := ServerOptions("MyKey", "MySecret", "MyAppID", "Location")
+	vsOpts := VersionOption("v1.0")
+
+	src := New(srvOpts, vsOpts)
+
 }
 
 func New(options ...Option) *Client {
